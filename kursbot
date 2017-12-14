@@ -1,0 +1,54 @@
+#!/bin/bash 
+
+#l3botscron
+#10 9 * * 1      root   /root/l3ots/kursbot  > /dev/null 2>&1
+
+###main_config
+USERID=""
+KEY=""
+URL="https://api.telegram.org/bot$KEY/sendMessage"
+TIMEOUT="10"
+
+DATE_EXEC="$(date "+%d%b%Y-%H:%M:%S")"
+
+TIMEOUT="10"
+
+function telegram_sendMessage
+{
+curl -s --max-time $TIMEOUT -d "chat_id=$USERID&disable_web_page_preview=1&parse_mode=html&text=$TEXT" $URL > /dev/null
+curl -s --max-time $TIMEOUT -d "chat_id=$USERID&disable_web_page_preview=1&parse_mode=html&text=$TEXT2" $URL > /dev/null
+curl -s --max-time $TIMEOUT -d "chat_id=$USERID&disable_web_page_preview=1&parse_mode=html&text=$TEXT3" $URL > /dev/null
+}
+
+########################################################################################################################
+wget https://bank.gov.ua/control/uk/curmetal/detail/currency?period=daily 
+
+cat currency?period=daily > tmp1
+
+cat tmp1  |grep -A 4 USD |grep 2 > tmp2
+cat tmp1  |grep -A 4 EUR |grep 3 > tmp3
+
+sed -i 's/<td class="cell_c">/ /' tmp2 
+sed -i 's/<.*\/td>/ /' tmp2
+
+sed -i 's/<td class="cell_c">/ /' tmp3 
+sed -i 's/<.*\/td>/ /' tmp3
+
+USD1=$(calc "$(cat tmp2)"/100)
+EUR1=$(calc "$(cat tmp3)"/100)
+
+USD=$(calc 1/$USD1)
+EUR=$(calc 1/$EUR1)
+
+echo WMZ "$USD"
+echo WME "$EUR"
+
+TEXT="<pre>L_B_Webmoney_$DATE_EXEC</pre><pre>------------------------------</pre><em>WMZ "$USD" WME "$EUR"</em>"
+TEXT2="UPDATE exchange_rate SET rate = '"$EUR"' WHERE id ='3' ;"
+TEXT3="UPDATE exchange_rate SET rate = '"$USD"' WHERE id ='2' ;"
+
+telegram_sendMessage
+
+	rm tmp*
+	rm currency?period=daily*
+sleep 10

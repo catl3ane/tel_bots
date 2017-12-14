@@ -1,0 +1,64 @@
+#!/bin/bash 
+
+###main_config
+USERID=""
+KEY=""
+
+URL="https://api.telegram.org/bot$KEY/sendMessage"
+TIMEOUT="10"
+
+DATE_EXEC="$(date "+%d%b%Y-%H:%M:%S")"
+
+TIMEOUT="10"
+
+
+function telegram_sendMessage
+{
+curl -s --max-time $TIMEOUT -d "chat_id=$USERID&disable_web_page_preview=1&parse_mode=html&text=$TEXT" $URL > /dev/null
+}
+
+function  text_style
+{
+TEXT="<pre>Link__HOSTS__$DATE_EXEC</pre><pre>-------------------------------</pre><em>"$OUT"</em>"
+}
+
+###########################################################
+cat hosts |  while read output
+do
+    ping -i 0.2 -c 2 "$output" > /dev/null
+    #NS=$(nslookup "$output")
+    if [ $? -eq 0 ]; then
+	echo "hostUP-$output" >>  htmp
+    else
+	echo "hostDOWN-$output" >> htmp
+    fi
+done
+ OUT=$(cat htmp)
+        text_style
+        telegram_sendMessage
+
+rm htmp*
+sleep 10
+
+#function  text_style_down
+#{
+#TEXT="<pre>Link__HOSTS__$DATE_EXEC</pre><pre>-------------------------------</pre><em>hostDOWN-"$output"</em>"
+#}
+#function  text_style_up
+#{
+#TEXT="<pre>Link__HOSTS__$DATE_EXEC</pre><pre>-------------------------------</pre><em>hostUP-"$output"</em>"
+#}
+###########################################################
+#date
+#cat  hosts |  while read output
+#do
+#    ping -i 0.2 -c 2 "$output" > /dev/null
+#    if [ $? -eq 0 ]; then
+#        text_style_up
+#        telegram_sendMessage
+#    else
+#        text_style_down
+#        telegram_sendMessage
+#    fi
+#done
+#sleep 10

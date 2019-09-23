@@ -1,0 +1,64 @@
+#!/bin/bash 
+
+#touch hosts#
+#crontab#* * * * *	  root   cd /etc/scripts/l3ots && /etc/scripts/l3ots/monitbot  >> /dev/null
+
+###main_config
+USERID=""
+KEY=""
+URL="https://api.telegram.org/bot$KEY/sendMessage"
+TIMEOUT="10"
+DATE_EXEC="$(date "+%d%b%Y-%H:%M:%S")"
+
+TIMEOUT="10"
+
+function telegram_sendMessage
+{
+curl -s --max-time $TIMEOUT -d "chat_id=$USERID&disable_web_page_preview=1&parse_mode=html&text=$TEXT" $URL > /dev/null
+}
+
+function  text_style_down
+{
+TEXT="<pre>Link__HOSTS__$DATE_EXEC</pre><pre>-------------------------------</pre><em>h-DOWN-"$HN"_"$output"</em>"
+}
+
+function  text_style_up
+{
+TEXT="<pre>Link__HOSTS__$DATE_EXEC</pre><pre>-------------------------------</pre><em>hostUP-"$output"</em>"
+}
+
+function ping_action_loss
+{
+VAR=0%
+IFDOWN=$(ping -i 0.2 -s 1400 -c 10 $HOST > tmpp && cat tmpp |grep "0%" |awk {'print$6'}) > /dev/null
+PACKETLOSS=$(cat tmpp |grep "%" |awk {'print$6'}) > /dev/null
+}
+
+function  text_style_loss
+{
+TEXT="<pre>L_H_HOSTDOWN_$DATE_EXEC</pre><pre>-------------------------------</pre><em>"$HOST"_"$HOSTNAME"_"$PACKETLOSS"</em>"
+}
+function hname
+{
+HN=$(cat hosts | grep $output | awk '{print $2}') > /dev/null
+}
+
+###########################################################
+
+cat hosts | awk {'print $1'} |  while read output
+do
+    ping -i 0.02 -c 5 "$output" > /dev/null
+    if [ $? -eq 0 ]; then
+        echo "up"
+	#hname
+	#text_style_up
+        #telegram_sendMessage
+    else
+	#echo"down"
+	hname
+        text_style_down
+        telegram_sendMessage
+    fi
+done
+
+sleep 1

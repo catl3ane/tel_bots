@@ -1,9 +1,8 @@
 #!/bin/bash 
-
+##toch hosts
 ###main_config
 USERID=""
 KEY=""
-
 URL="https://api.telegram.org/bot$KEY/sendMessage"
 TIMEOUT="10"
 
@@ -25,7 +24,7 @@ TEXT="<pre>Link__HOSTS__$DATE_EXEC</pre><pre>-------------------------------</pr
 ###########################################################
 cat hosts |  while read output
 do
-    ping -i 0.2 -c 2 "$output" > /dev/null
+    ping -c 2 -i 0.2 -s 10 "$output" > /dev/null
     #NS=$(nslookup "$output")
     if [ $? -eq 0 ]; then
 	echo "hostUP-$output" >>  htmp
@@ -39,26 +38,3 @@ done
 
 rm htmp*
 sleep 10
-
-#function  text_style_down
-#{
-#TEXT="<pre>Link__HOSTS__$DATE_EXEC</pre><pre>-------------------------------</pre><em>hostDOWN-"$output"</em>"
-#}
-#function  text_style_up
-#{
-#TEXT="<pre>Link__HOSTS__$DATE_EXEC</pre><pre>-------------------------------</pre><em>hostUP-"$output"</em>"
-#}
-###########################################################
-#date
-#cat  hosts |  while read output
-#do
-#    ping -i 0.2 -c 2 "$output" > /dev/null
-#    if [ $? -eq 0 ]; then
-#        text_style_up
-#        telegram_sendMessage
-#    else
-#        text_style_down
-#        telegram_sendMessage
-#    fi
-#done
-#sleep 10
